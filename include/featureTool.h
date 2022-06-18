@@ -25,7 +25,7 @@ public:
     ~MyFeature2D();
     Features extractFeatures(const cv::Mat &image);
 
-    static Matching matchFeatures(const Features &featuresLeft, const Features &featuresRight);
+    vector<cv::DMatch> matchFeatures(const Features &featuresLeft, const Features &featuresRight);
 };
 
 #endif

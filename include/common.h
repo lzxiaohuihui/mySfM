@@ -13,33 +13,41 @@
 
 #include <map>
 
+using namespace std;
+
 const float POSE_INLIERS_MINIMAL_RATIO = 0.5;
 
-struct Intrinsics{
+struct Intrinsics
+{
     cv::Mat K;
     cv::Mat Kinv;
     cv::Mat distortion;
 };
 
-struct ImagePair{
+struct ImagePair
+{
     size_t left, right;
 };
 
-typedef std::vector<cv::KeyPoint> Keypoints;
-typedef std::vector<cv::Point2f> Points2f;
-typedef std::vector<cv::Point3f> Points3f;
+// typedef std::vector<cv::KeyPoint> Keypoints;
+// typedef std::vector<cv::Point2f> Points2f;
+// typedef std::vector<cv::Point3f> Points3f;
 
-struct Features{
-    Points2f points;
-    std::vector<float> descriptors;
+struct Features
+{
+    vector<cv::KeyPoint> keypoints;
+    vector<cv::Point2f> points;
+    vector<float> descriptors;
 };
 
-struct Point3DInMap{
+struct Point3DInMap
+{
     cv::Point3f p;
-    std::map<int,int> originatingViews;
+    map<int, int> originatingViews;
 };
 
-struct Point3DInMapRGB{
+struct Point3DInMapRGB
+{
     Point3DInMap p;
     cv::Scalar rgb;
 };
@@ -50,11 +58,28 @@ typedef std::vector<Point3DInMapRGB> PointCloudRGB;
 
 typedef cv::Matx34f Pose;
 
-struct Image2D3DMatch{
-    Points2f points2D;
-    Points3f points3D;
+struct Image2D3DMatch
+{
+    vector<cv::Point2f> points2D;
+    vector<cv::Point3f> points3D;
 };
 
+void getAlignedPointsFromMatch(const Features &leftFeatures,
+                               const Features &rightFeatures,
+                               const vector<cv::DMatch> &matches,
+                               Features &alignedLeft,
+                               Features &alignedRight);
+// 获取2d匹配点对
+void getAlignedPointsFromMatch(const Features &leftFeatures,
+                               const Features &rightFeatures,
+                               const vector<cv::DMatch> &matches,
+                               Features &alignedLeft,
+                               Features &alignedRight,
+                               std::vector<int> &leftBackReference,
+                               std::vector<int> &rightBackReference);
+void keypointsToPoints(const vector<cv::KeyPoint> &kps, vector<cv::Point2f> &ps);
+void pointsToKeypoints(const vector<cv::Point2f> &ps, vector<cv::KeyPoint> &kps);
 
+vector<cv::DMatch> getAlignedMatching(size_t size);
 
 #endif

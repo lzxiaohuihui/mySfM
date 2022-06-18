@@ -9,6 +9,11 @@
 #include "../include/myStereo.h"
 #include <iostream>
 
+using namespace std;
+
+const double RANSAC_THRESHOLD = 10.0f;     // RANSAC inlier threshold
+const float MIN_REPROJECTION_ERROR = 10.0; // Maximum 10-pixel allowed re-projection error
+
 MyStereo::MyStereo()
 {
 }
@@ -20,18 +25,36 @@ MyStereo::~MyStereo()
 int MyStereo::findHomographyInliers(
     const Features &left,
     const Features &right,
-    const Matching &matches)
+    const vector<cv::DMatch> &matches)
 {
-    int returnValue;
-    return returnValue;
+    Features alignedLeft, alignedRight;
+
+    cout << "get aligned points" << endl;
+    getAlignedPointsFromMatch(left, right, matches, alignedLeft, alignedRight);
+
+    cv::Mat inlierMask;
+    cv::Mat homography;
+    cout << "find homography... " << endl;
+    if (matches.size() >= 4)
+    {
+        homography = cv::findHomography(alignedLeft.points,
+                                        alignedRight.points,
+                                        cv::RANSAC,
+                                        RANSAC_THRESHOLD,
+                                        inlierMask);
+    }
+    if (matches.size() < 4 || homography.empty())
+        return 0;
+
+    return cv::countNonZero(inlierMask);
 }
 
 bool MyStereo::findCameraPoseFromMatch(
     const Intrinsics &intrinsics,
-    const Matching &featureMatching,
+    const vector<cv::DMatch> &featureMatching,
     const Features &featuresLeft,
     const Features &featuresRight,
-    Matching &prueMatches,
+    vector<cv::DMatch> &prueMatches,
     cv::Matx34f &PoseLeft,
     cv::Matx34f &PoseRight)
 {
@@ -42,7 +65,7 @@ bool MyStereo::findCameraPoseFromMatch(
 bool MyStereo::triangulateViews(
     const Intrinsics &intrinsics,
     const ImagePair imagePair,
-    const Matching &matches,
+    const vector<cv::DMatch> &matches,
     const Features &leftFeatures,
     const Features &rightFeatures,
     const cv::Matx34f &PoseLeft,
@@ -112,7 +135,7 @@ bool MyStereo::checkE(
 int MyStereo::findEssenialMatrix(
     const Features &left,
     const Features &right,
-    const Matching &matches,
+    const vector<cv::DMatch> &matches,
     const Intrinsics &intrinsics)
 {
     int returnValue = 0;
@@ -143,8 +166,8 @@ int MyStereo::findEssenialMatrix(
     bool flag = true;
     Eigen::Matrix<double, 3, 4> T1;
     T1 << 1, 0, 0, 0,
-     0, 1, 0, 0, 
-     0, 0, 1, 0;
+        0, 1, 0, 0,
+        0, 0, 1, 0;
     Eigen::Matrix<double, 3, 4> T2;
 
     Eigen::Vector2d point1 = Eigen::Vector2d(

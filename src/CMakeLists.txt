@@ -25,7 +25,10 @@ add_executable(
     main 
     main.cpp
     sfm.cpp
+    common.cpp
     featureTool.cpp
+    image.cpp
+    myStereo.cpp
     )
 target_link_libraries(main
     libsiftgpu.so

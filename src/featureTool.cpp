@@ -1,7 +1,7 @@
 /*
  * @Date: 2022-05-27 13:22:06
  * @LastEditors: lzxiaohuihui 895827938@qq.com
- * @LastEditTime: 2022-05-29 15:29:01
+ * @LastEditTime: 2022-06-14 20:25:12
  * @FilePath: /mySfmUsingCV/src/featureTool.cpp
  * @Description: 练练手
  */
@@ -51,13 +51,13 @@ Features MyFeature2D::extractFeatures(const cv::Mat &image)
     return result_features;
 }
 
-Matching MyFeature2D::matchFeatures(const Features &featuresLeft, const Features &featuresRight)
+vector<cv::DMatch> MyFeature2D::matchFeatures(const Features &featuresLeft, const Features &featuresRight)
 {
-    Matching initMatches;
+    vector<cv::DMatch> initMatches;
 
-    matcher.SetDescriptors(0, featuresLeft.points.size(), &(featuresLeft.desp[0]));
-    matcher.SetDescriptors(1, featuresRight.points.size(), &(featuresRight.desp[0]));
-    int(*match_buf)[2] = new int[frame1.keypoints.size()][2];
+    matcher.SetDescriptors(0, featuresLeft.points.size(), &(featuresLeft.descriptors[0]));
+    matcher.SetDescriptors(1, featuresRight.points.size(), &(featuresRight.descriptors[0]));
+    int(*match_buf)[2] = new int[featuresLeft.points.size()][2];
     int num_match = matcher.GetSiftMatch(featuresLeft.points.size(), match_buf);
     // std::cout << "match number : " << num_match << endl;
     // frame1.link.push_back(frame2.frameID);
@@ -78,7 +78,6 @@ Matching MyFeature2D::matchFeatures(const Features &featuresLeft, const Features
         initMatches.push_back(match);
     }
     delete[] match_buf;
-
 
     return initMatches;
 }

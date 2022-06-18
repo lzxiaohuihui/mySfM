@@ -16,6 +16,8 @@
 #include <eigen3/Eigen/Geometry>
 #include <opencv2/core/eigen.hpp>
 
+using namespace std;
+
 class MyStereo
 {
 private:
@@ -35,27 +37,27 @@ public:
     static int findHomographyInliers(
         const Features &left,
         const Features &right,
-        const Matching &matches);
+        const vector<cv::DMatch> &matches);
 
     static int findEssenialMatrix(
         const Features &left,
         const Features &right,
-        const Matching &matches,
+        const vector<cv::DMatch> &matches,
         const Intrinsics &intrinsics);
 
     static bool findCameraPoseFromMatch(
         const Intrinsics &intrinsics,
-        const Matching &featureMatching,
+        const vector<cv::DMatch> &featureMatching,
         const Features &featuresLeft,
         const Features &featuresRight,
-        Matching &prueMatches,
+        vector<cv::DMatch> &prueMatches,
         cv::Matx34f &PoseLeft,
         cv::Matx34f &PoseRight);
 
     static bool triangulateViews(
         const Intrinsics &intrinsics,
         const ImagePair imagePair,
-        const Matching &matches,
+        const vector<cv::DMatch> &matches,
         const Features &leftFeatures,
         const Features &rightFeatures,
         const cv::Matx34f &PoseLeft,
@@ -74,7 +76,7 @@ public:
         Eigen::Vector3d &t);
 
     static bool checkE(
-        Eigen::Matrix<double ,3, 4> T1, 
+        Eigen::Matrix<double, 3, 4> T1,
         Eigen::Matrix3d R,
         Eigen::Vector3d t,
         Eigen::Vector2d point1,

@@ -9,8 +9,9 @@
 #ifndef _SFM_H_
 #define _SFM_H_
 
-#include "common.h"
-#include "featureTool.h"
+#include "../include/common.h"
+#include "../include/featureTool.h"
+#include "../include/myStereo.h"
 
 #include <string>
 #include <vector>
@@ -23,7 +24,7 @@ enum RunResult
     ERROR
 };
 
-typedef std::vector<std::vector<Matching>> MatchMatrix;
+typedef std::vector<std::vector<std::vector<cv::DMatch>>> MatchMatrix;
 typedef std::map<int, Image2D3DMatch> Image2D3DMatches;
 
 class Sfm
@@ -40,7 +41,7 @@ private:
     MatchMatrix mFeatureMatchMatrix;
     Intrinsics mintrinsics;
     float mDownscaleFactor;
-
+    vector<Point3DInMap> mReconstructionCloud;
     MyFeature2D myFeature2d;
 
     /**
