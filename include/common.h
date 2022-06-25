@@ -50,6 +50,7 @@ struct Features
 struct Point3DInMap
 {
     cv::Point3f p;
+    // 被那副图像哪个特征点观测到
     map<int, int> originatingViews;
 };
 

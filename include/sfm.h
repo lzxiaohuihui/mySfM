@@ -84,7 +84,7 @@ public:
      */
     RunResult runSfm();
 
-    void saveCloudAndCamerasToPLY(const std::string &filename);
+    void saveCloudAndCamerasToPLY(const std::string &prefix);
 };
 
 #endif

@@ -328,3 +328,41 @@ int MyStereo::findEssenialMatrix(
 
     return returnValue;
 }
+
+bool MyStereo::findCameraPoseFrom2D3DMatch(
+    const Intrinsics &intrinsics,
+    const Image2D3DMatch &match,
+    cv::Matx34f &cameraPose)
+{
+
+    // Recover camera pose using 2D-3D correspondence
+    cv::Mat rvec, tvec;
+    cv::Mat inliers;
+    cv::solvePnPRansac(
+        match.points3D,
+        match.points2D,
+        intrinsics.K,
+        intrinsics.distortion,
+        rvec,
+        tvec,
+        false,
+        100,
+        RANSAC_THRESHOLD,
+        0.99,
+        inliers);
+
+    // check inliers ratio and reject if too small
+    if (((float)countNonZero(inliers) / (float)match.points2D.size()) < POSE_INLIERS_MINIMAL_RATIO)
+    {
+        cerr << "Inliers ratio is too small: " << countNonZero(inliers) << " / " << match.points2D.size() << endl;
+        return false;
+    }
+
+    cv::Mat rotMat;
+    cv::Rodrigues(rvec, rotMat); // convert to a rotation matrix
+
+    rotMat.copyTo(cv::Mat(3, 4, CV_32FC1, cameraPose.val)(ROT));
+    tvec.copyTo(cv::Mat(3, 4, CV_32FC1, cameraPose.val)(TRA));
+
+    return true;
+}

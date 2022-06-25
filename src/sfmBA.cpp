@@ -61,7 +61,7 @@ void SfmBA::bundleAdjust(
     const std::vector<Features> &image2dFeatures)
 {
     std::call_once(initLoggingFlag, initLogging);
-
+    // 构建最小二乘问题
     ceres::Problem problem;
 
     typedef cv::Matx<double, 1, 6> CameraVector;
@@ -78,6 +78,7 @@ void SfmBA::bundleAdjust(
         }
 
         cv::Vec3f t(pose(0, 3), pose(1, 3), pose(2, 3));
+        // get_minor函数，从(0, 0)开始，提取一个3*3的子矩阵
         cv::Matx33f R = pose.get_minor<3, 3>(0, 0);
         float angleAxis[3];
         ceres::RotationMatrixToAngleAxis<float>(R.t().val, angleAxis);
@@ -97,11 +98,14 @@ void SfmBA::bundleAdjust(
 
     for (int i = 0; i < pointCloud.size(); ++i)
     {
+        // 遍历当前点云
         const Point3DInMap &p = pointCloud[i];
         points3d[i] = cv::Vec3d(p.p.x, p.p.y, p.p.z);
 
+        // 遍历观测到该3D点的相机
         for (const auto &kv : p.originatingViews)
         {
+
             cv::Point2f p2d = image2dFeatures[kv.first].points[kv.second];
 
             p2d.x -= intrinsics.K.at<float>(0, 2);

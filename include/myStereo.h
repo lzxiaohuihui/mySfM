@@ -81,6 +81,11 @@ public:
         Eigen::Vector3d t,
         Eigen::Vector2d point1,
         Eigen::Vector2d point2);
+
+    static bool findCameraPoseFrom2D3DMatch(
+        const Intrinsics &intrinsics,
+        const Image2D3DMatch &match,
+        cv::Matx34f &cameraPose);
 };
 
 #endif
