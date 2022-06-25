@@ -15,6 +15,12 @@
 
 using namespace std;
 
+/// Rotational element in a 3x4 matrix
+const cv::Rect ROT(0, 0, 3, 3);
+
+/// Translational element in a 3x4 matrix
+const cv::Rect TRA(3, 0, 1, 3);
+
 const float POSE_INLIERS_MINIMAL_RATIO = 0.5;
 
 struct Intrinsics
@@ -28,6 +34,7 @@ struct ImagePair
 {
     size_t left, right;
 };
+std::ostream &operator<<(std::ostream &stream, const ImagePair &pair);
 
 // typedef std::vector<cv::KeyPoint> Keypoints;
 // typedef std::vector<cv::Point2f> Points2f;

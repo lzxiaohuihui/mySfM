@@ -5,6 +5,7 @@ FIND_PACKAGE(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(CUDA REQUIRED)
 find_package(Boost      REQUIRED COMPONENTS system chrono filesystem unit_test_framework program_options)
+find_package(Ceres REQUIRED)
 
 
 include_directories(${Boost_INCLUDE_DIR})
@@ -29,10 +30,13 @@ add_executable(
     featureTool.cpp
     image.cpp
     myStereo.cpp
+    sfmBA.cpp
     )
 target_link_libraries(main
     libsiftgpu.so
     ${Boost_LIBRARIES}
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${CERES_LIBRARIES}
     ${OpenCV_LIBS} 
     ${GLEW_LIBRARIES} 
     ${GLUT_LIBRARIES} 

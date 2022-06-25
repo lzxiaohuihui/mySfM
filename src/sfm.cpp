@@ -6,8 +6,10 @@
  * @Description: ������
  */
 #include "../include/sfm.h"
+#include "../include/sfmBA.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -95,7 +97,6 @@ void Sfm::findBaselineTriangulation()
     cout << "--- Sort views by homography inliers" << endl;
 
     map<float, ImagePair> pairHomographyInliers = sortViewsForBaseline();
-
     cv::Matx34f pLeft = cv::Matx34f::eye();
     cv::Matx34f pRight = cv::Matx34f::eye();
     vector<Point3DInMap> pointCloud;
@@ -104,8 +105,8 @@ void Sfm::findBaselineTriangulation()
     // try to find the best pair,
     for (auto &imagePair : pairHomographyInliers)
     {
-        cout << "Trying " << imagePair.second << " ratio: " << imagePair.first << endl
-             << flush;
+        cout << "Trying " << imagePair.second << " ratio: " << imagePair.first << endl;
+
         size_t i = imagePair.second.left;
         size_t j = imagePair.second.right;
 
@@ -128,7 +129,7 @@ void Sfm::findBaselineTriangulation()
         float poseInliersRatio = (float)prunedMatching.size() / (float)mFeatureMatchMatrix[i][j].size();
 
         mFeatureMatchMatrix[i][j] = prunedMatching;
-        cout << "---- Triangulate from stereo views: " << imagePair.second << endl;
+        cout << "---- Triangulate from stereo views: " << imagePair.second.left << endl;
 
         success = MyStereo::triangulateViews(mintrinsics,
                                              imagePair.second,
@@ -147,11 +148,17 @@ void Sfm::findBaselineTriangulation()
         msDoneViews.insert(i);
         msGoodViews.insert(j);
 
+        adjustCurrentBundle();
         break;
     }
 }
 void Sfm::adjustCurrentBundle()
 {
+    SfmBA::bundleAdjust(
+        mReconstructionCloud,
+        mvCameraPoses,
+        mintrinsics,
+        mvImageFeatures);
 }
 std::map<float, ImagePair> Sfm::sortViewsForBaseline()
 {

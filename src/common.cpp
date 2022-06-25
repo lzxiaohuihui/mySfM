@@ -5,6 +5,11 @@
 
 using namespace std;
 
+std::ostream &operator<<(std::ostream &stream, const ImagePair &pair)
+{
+    return stream << "[" << pair.left << ", " << pair.right << "]";
+}
+
 void getAlignedPointsFromMatch(const Features &leftFeatures,
                                const Features &rightFeatures,
                                const vector<cv::DMatch> &matches,
