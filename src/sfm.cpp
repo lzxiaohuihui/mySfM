@@ -148,8 +148,8 @@ void Sfm::findBaselineTriangulation()
         mvCameraPoses[i] = pLeft;
         mvCameraPoses[j] = pRight;
         msDoneViews.insert(i);
-        msGoodViews.insert(j);
-        msDoneViews.insert(i);
+        msGoodViews.insert(i);
+        msDoneViews.insert(j);
         msGoodViews.insert(j);
 
         adjustCurrentBundle();
@@ -289,12 +289,14 @@ void Sfm::mergeNewPointCloud(const PointCloud &cloud)
     size_t newPoints = 0;
     size_t mergedPoints = 0;
 
+    // 当前三角化出来的点云
     for (const Point3DInMap &p : cloud)
     {
         const cv::Point3f newPoint = p.p; // new 3D point
 
         bool foundAnyMatchingExistingViews = false;
         bool foundMatching3DPoint = false;
+        // 已存在的点云
         for (Point3DInMap &existingPoint : mReconstructionCloud)
         {
             if (cv::norm(existingPoint.p - newPoint) < MERGE_CLOUD_POINT_MIN_MATCH_DISTANCE)
@@ -361,29 +363,29 @@ void Sfm::mergeNewPointCloud(const PointCloud &cloud)
     }
 
     // debug: show new matching points in the cloud
-    for (size_t i = 0; i < numImages - 1; i++)
-    {
-        for (size_t j = i; j < numImages; j++)
-        {
-            const Matching &matching = mergeMatchMatrix[i][j];
-            if (matching.empty())
-            {
-                continue;
-            }
+    // for (size_t i = 0; i < numImages - 1; i++)
+    // {
+    //     for (size_t j = i; j < numImages; j++)
+    //     {
+    //         const Matching &matching = mergeMatchMatrix[i][j];
+    //         if (matching.empty())
+    //         {
+    //             continue;
+    //         }
 
-            cv::Mat outImage;
-            drawMatches(mvImages[i], mvImageFeatures[i].keypoints,
-                        mvImages[j], mvImageFeatures[j].keypoints,
-                        matching, outImage);
-            // write the images index...
-            cv::putText(outImage, "Image " + to_string(i), cv::Point(10, 50), CV_FONT_NORMAL, 3.0, cv::Scalar(0, 255, 0), 3);
-            cv::putText(outImage, "Image " + to_string(j), cv::Point(10 + outImage.cols / 2, 50), CV_FONT_NORMAL, 3.0, cv::Scalar(0, 255, 0), 3);
-            cv::resize(outImage, outImage, cv::Size(), 0.25, 0.25);
-            cv::imshow("Merge Match", outImage);
-            cv::waitKey(0);
-        }
-    }
-    cv::destroyWindow("Merge Match");
+    //         cv::Mat outImage;
+    //         drawMatches(mvImages[i], mvImageFeatures[i].keypoints,
+    //                     mvImages[j], mvImageFeatures[j].keypoints,
+    //                     matching, outImage);
+    //         // write the images index...
+    //         cv::putText(outImage, "Image " + to_string(i), cv::Point(10, 50), CV_FONT_NORMAL, 3.0, cv::Scalar(0, 255, 0), 3);
+    //         cv::putText(outImage, "Image " + to_string(j), cv::Point(10 + outImage.cols / 2, 50), CV_FONT_NORMAL, 3.0, cv::Scalar(0, 255, 0), 3);
+    //         cv::resize(outImage, outImage, cv::Size(), 0.25, 0.25);
+    //         cv::imshow("Merge Match", outImage);
+    //         cv::waitKey(0);
+    //     }
+    // }
+    // cv::destroyWindow("Merge Match");
 
     cout << " adding: " << cloud.size() << " (new: " << newPoints << ", merged: " << mergedPoints << ")" << endl;
 }
@@ -585,9 +587,12 @@ RunResult Sfm::runSfm()
         // cerr << "No images to work." <<endl;
         return RunResult::ERROR;
     }
-    mintrinsics.K = (cv::Mat_<float>(3, 3) << 525, 0, mvImages[0].rows / 2,
-                     0, 525, mvImages[0].cols / 2,
+    mintrinsics.K = (cv::Mat_<float>(3, 3) << 525, 0, 319.5,
+                     0, 525, 239.5,
                      0, 0, 1);
+    // mintrinsics.K = (cv::Mat_<float>(3, 3) << 2500, 0, mvImages[0].cols / 2,
+    //                  0, 2500, mvImages[0].rows / 2,
+    //                  0, 0, 1);
     mintrinsics.Kinv = mintrinsics.K.inv();
     mintrinsics.distortion = cv::Mat_<float>::zeros(1, 4);
 
@@ -599,8 +604,9 @@ RunResult Sfm::runSfm()
 
     findBaselineTriangulation();
 
+    addMoreViewsToReconstruction();
+
     saveCloudAndCamerasToPLY("test");
-    // addMoreViewsToReconstruction();
 
     cout << "------------Done--------------" << endl;
     return RunResult::OKAY;

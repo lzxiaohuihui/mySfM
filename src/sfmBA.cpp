@@ -16,7 +16,8 @@ std::once_flag initLoggingFlag;
 
 struct SimpleReprojectionError
 {
-    SimpleReprojectionError(double observed_x, double observed_y) : observed_x(observed_x), observed_y(observed_y)
+    SimpleReprojectionError(double observed_x, double observed_y)
+        : observed_x(observed_x), observed_y(observed_y)
     {
     }
     template <typename T>
@@ -102,10 +103,10 @@ void SfmBA::bundleAdjust(
         const Point3DInMap &p = pointCloud[i];
         points3d[i] = cv::Vec3d(p.p.x, p.p.y, p.p.z);
 
-        // 遍历观测到该3D点的相机
+        // 遍历观测到该3D点的相机和特征点
         for (const auto &kv : p.originatingViews)
         {
-
+            // 观测到该店的2d点
             cv::Point2f p2d = image2dFeatures[kv.first].points[kv.second];
 
             p2d.x -= intrinsics.K.at<float>(0, 2);
@@ -124,7 +125,7 @@ void SfmBA::bundleAdjust(
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
-    options.max_num_iterations = 500;
+    options.max_num_iterations = 1000;
     options.eta = 1e-2;
     options.max_solver_time_in_seconds = 10;
     options.logging_type = ceres::LoggingType::SILENT;
